@@ -10,19 +10,25 @@ class TodoList extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final listModel = dotenv.env['USE_POLYGON'] == 'true'
+    final isUsePolygon = dotenv.env['USE_POLYGON'] == 'true';
+    final listModel = isUsePolygon
         ? Provider.of<PolygonTodoListModel>(context, listen: true)
         : Provider.of<FirestoreTodoListModel>(context, listen: true);
 
     return Scaffold(
       appBar: AppBar(
         title: const Text("Dapp Todo"),
+        actions: [
+          Container(
+              alignment: Alignment.center,
+              padding: const EdgeInsets.only(right: 8),
+              child: Text(isUsePolygon ? 'Polygon' : 'Firestore')),
+        ],
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
-          showTodoBottomSheet(context, onCreate: (controller) {
-            listModel.addTask(controller.text);
-            Navigator.pop(context);
+          showTodoBottomSheet(context, onCreate: (controller) async {
+            await listModel.addTask(controller.text);
           });
         },
         child: const Icon(Icons.add),
@@ -41,12 +47,11 @@ class TodoList extends StatelessWidget {
                         onTap: () {
                           final task = listModel.todos[index];
                           showTodoBottomSheet(context, task: task,
-                              onUpdate: (controller) {
-                            listModel.updateTask(task.id!, controller.text);
-                            Navigator.pop(context);
-                          }, onDelete: () {
-                            listModel.deleteTask(task.id!);
-                            Navigator.pop(context);
+                              onUpdate: (controller) async {
+                            await listModel.updateTask(
+                                task.id!, controller.text);
+                          }, onDelete: () async {
+                            await listModel.deleteTask(task.id!);
                           });
                         },
                         child: Container(

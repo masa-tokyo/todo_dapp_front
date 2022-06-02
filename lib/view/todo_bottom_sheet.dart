@@ -55,19 +55,19 @@ showTodoBottomSheet(BuildContext context,
                   height: 12,
                 ),
                 if (task == null)
-                  buildButton("Created", () {
+                  buildButton(context, 'Create', () async {
                     if (onCreate != null) {
                       onCreate(_titleController);
                     }
                   }),
                 if (task != null)
-                  buildButton("Updated", () {
+                  buildButton(context, 'Update', () async {
                     if (onUpdate != null) {
                       onUpdate(_titleController);
                     }
                   }),
                 if (task != null)
-                  buildButton("Delete", () {
+                  buildButton(context, 'Delete', () async {
                     if (onDelete != null) {
                       onDelete();
                     }
@@ -79,9 +79,12 @@ showTodoBottomSheet(BuildContext context,
       });
 }
 
-TextButton buildButton(String text, Function onPressed) {
+TextButton buildButton(BuildContext context, String text, Function onPressed) {
   return TextButton(
-      onPressed: onPressed(),
+      onPressed: () async {
+        onPressed();
+        Navigator.pop(context);
+      },
       child: Container(
         child: Center(
           child: Text(

@@ -1,6 +1,5 @@
 import 'dart:convert';
 import 'dart:core';
-import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:http/http.dart';
 import 'package:todo_dapp_front/task.dart';
@@ -100,7 +99,6 @@ class PolygonTodoListModel extends TodoListModel {
     notifyListeners();
   }
 
-  //1.to-doを作成する機能
   @override
   addTask(String taskNameData) async {
     isLoading = true;
@@ -114,7 +112,6 @@ class PolygonTodoListModel extends TodoListModel {
     await getTodos();
   }
 
-  //2.to-doを更新する機能
   @override
   updateTask(int id, String taskNameData) async {
     isLoading = true;
@@ -130,7 +127,6 @@ class PolygonTodoListModel extends TodoListModel {
     await getTodos();
   }
 
-  //3.to-doの完了・未完了を切り替える機能
   @override
   toggleComplete(int id) async {
     isLoading = true;
@@ -146,7 +142,6 @@ class PolygonTodoListModel extends TodoListModel {
     await getTodos();
   }
 
-  //4.to-doを削除する機能
   @override
   deleteTask(int id) async {
     isLoading = true;

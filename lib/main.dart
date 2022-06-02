@@ -33,6 +33,7 @@ class MyApp extends StatelessWidget {
       ],
       child: const MaterialApp(
         title: 'Flutter TODO',
+        debugShowCheckedModeBanner: false,
         home: SetUp(child: TodoList()),
       ),
     );

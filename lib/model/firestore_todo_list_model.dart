@@ -1,16 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_core/firebase_core.dart';
-import 'package:flutter/material.dart';
-import 'package:todo_dapp_front/task.dart';
-import 'dart:convert';
-import 'dart:core';
-import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
-import 'package:http/http.dart';
 import 'package:todo_dapp_front/task.dart';
 import 'package:todo_dapp_front/model/todo_list_model.dart';
-import 'package:web3dart/web3dart.dart';
-import 'package:web_socket_channel/io.dart';
 
 class FirestoreTodoListModel extends TodoListModel {
   FirestoreTodoListModel() {
@@ -29,55 +19,52 @@ class FirestoreTodoListModel extends TodoListModel {
         taskName: todo['taskName'],
         isCompleted: todo['isCompleted'],
       );
-    }).toList();
+    }).toList()
+      ..sort((a, b) => a.id!.compareTo(b.id!));
 
     isLoading = false;
-    todos = todos.reversed.toList();
-
     notifyListeners();
   }
 
-  //1.to-doを作成する機能
   @override
   addTask(String taskNameData) async {
     isLoading = true;
     notifyListeners();
 
-    final ref = _db.collection('todos');
-    await ref.add({
-      'id': todos.length,
+    await _db.collection('todos').add({
+      'id': todos.last.id! + 1,
       'taskName': taskNameData,
       'isCompleted': false,
     });
-
     await getTodos();
   }
 
-  //2.to-doを更新する機能
   @override
   updateTask(int id, String taskNameData) async {
     isLoading = true;
     notifyListeners();
 
+    final snap = await _db.collection('todos').where('id', isEqualTo: id).get();
+    final target = snap.docs[0];
+    await target.reference.update({
+      'taskName': taskNameData,
+    });
+
     await getTodos();
   }
 
-  //3.to-doの完了・未完了を切り替える機能
   @override
   toggleComplete(int id) async {
     isLoading = true;
     notifyListeners();
-    final ref = _db.collection('todos');
-    final snap = await ref.where(id, isEqualTo: id).get();
+    final snap = await _db.collection('todos').where('id', isEqualTo: id).get();
     final target = snap.docs[0];
-    await ref
-        .doc(target.id)
+    await target.reference
         .update({'isCompleted': !target.data()['isCompleted']});
 
     await getTodos();
   }
 
-  //4.to-doを削除する機能
   @override
   deleteTask(int id) async {
     isLoading = true;
@@ -85,13 +72,11 @@ class FirestoreTodoListModel extends TodoListModel {
 
     await _db
         .collection('todos')
-        .where(id, isEqualTo: id)
+        .where('id', isEqualTo: id)
         .get()
         .then((value) async {
-      await Future.forEach(value.docs, (todo) {
-        todo as QueryDocumentSnapshot;
-        todo.reference.delete();
-      });
+      final target = value.docs[0];
+      await target.reference.delete();
     });
 
     await getTodos();
